@@ -1,1 +1,25 @@
-{"expo":{"name":"FINDR","slug":"findr","scheme":"findr","version":"1.0.0","orientation":"portrait","userInterfaceStyle":"dark","plugins":["expo-router","expo-image-picker"],"ios":{"supportsTablet":true,"bundleIdentifier":"com.findr.app"},"android":{"package":"com.findr.app"},"web":{"bundler":"metro"}}}
+{
+  "expo": {
+    "name": "FINDR",
+    "slug": "findr",
+    "scheme": "findr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "plugins": [
+      "expo-router",
+      "expo-image-picker"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.findr.app"
+    },
+    "android": {
+      "package": "com.findr.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    }
+  }
+}
