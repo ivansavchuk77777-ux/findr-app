@@ -1,4 +1,4 @@
-name: Build FINDR Web
+name: Deploy FINDR Web
 
 on:
   push:
@@ -7,25 +7,41 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Get FINDR
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install
         run: npm install
-
       - name: Validate Expo dependencies
         run: npx expo install --check
-
       - name: Build web version
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://gdbsdmtipllzehbzweev.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_eRFDJ2Q7H-3Av4pfDVFr6Q_mF5fAz1j
         run: npm run build:web
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+      - name: Deploy FINDR
+        id: deployment
+        uses: actions/deploy-pages@v4
