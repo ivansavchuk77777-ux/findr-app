@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,13 +22,10 @@ jobs:
           node-version: 20
 
       - name: Install
-        run: npm install && npx expo install --fix && npx expo install react-dom react-native-web
+        run: npm install
+
+      - name: Validate Expo dependencies
+        run: npx expo install --check
 
       - name: Build web version
-        run: npx expo export --platform web
-
-      - name: Deploy FINDR
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+        run: npm run build:web
