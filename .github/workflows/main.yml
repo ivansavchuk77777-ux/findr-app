@@ -22,7 +22,7 @@ jobs:
           node-version: 20
 
       - name: Install
-        run: npm install
+        run: npm install && npx expo install react-native-web
 
       - name: Build web version
         run: npx expo export --platform web
