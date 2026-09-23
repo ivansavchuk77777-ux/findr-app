@@ -1,0 +1,8 @@
+create extension if not exists pgcrypto;
+create table if not exists public.searches (id uuid primary key default gen_random_uuid(), user_id uuid references auth.users(id) on delete cascade, raw_query text not null, parsed_query jsonb not null default '{}'::jsonb, created_at timestamptz not null default now());
+create table if not exists public.matches (id uuid primary key default gen_random_uuid(), search_id uuid references public.searches(id) on delete cascade, provider text not null, provider_item_id text, title text not null, url text, price numeric, metadata jsonb not null default '{}'::jsonb, score real, created_at timestamptz not null default now(), unique(provider,provider_item_id));
+create table if not exists public.watch_rules (id uuid primary key default gen_random_uuid(), search_id uuid references public.searches(id) on delete cascade, user_id uuid references auth.users(id) on delete cascade, cadence_minutes int not null default 360, enabled boolean not null default true, last_checked_at timestamptz, created_at timestamptz not null default now());
+alter table public.searches enable row level security; alter table public.matches enable row level security; alter table public.watch_rules enable row level security;
+create policy "own searches" on public.searches for all using (auth.uid()=user_id) with check (auth.uid()=user_id);
+create policy "own matches" on public.matches for select using (exists(select 1 from public.searches s where s.id=search_id and s.user_id=auth.uid()));
+create policy "own watches" on public.watch_rules for all using (auth.uid()=user_id) with check (auth.uid()=user_id);

@@ -1,0 +1,10 @@
+import express from 'express'; import cors from 'cors'; import crypto from 'crypto';
+const app=express(); app.use(cors()); app.use(express.json());
+const watches=[];
+function parseQuery(q){const money=q.match(/(?:under|below|max(?:imum)?|less than)\s*\$?([\d,]+)/i);const miles=q.match(/(?:within|inside)\s*(\d+)\s*miles?/i);const year=q.match(/\b(19|20)\d{2}\+?/);return {raw:q,max_price:money?Number(money[1].replace(/,/g,'')):null,radius_miles:miles?Number(miles[1]):null,min_year:year?Number(year[0].replace('+','')):null,terms:q.replace(/(?:under|below|max(?:imum)?|less than)\s*\$?[\d,]+/ig,'').replace(/(?:within|inside)\s*\d+\s*miles?/ig,'').trim()};}
+function demoResults(parsed){return [{id:'demo-1',title:`Best current match for “${parsed.terms}”`,subtitle:'Provider adapter is working. Connect an approved marketplace/search API in backend/src/providers to replace this demo result.',price:parsed.max_price?`Under $${parsed.max_price.toLocaleString()}`:undefined,provider:'FINDR demo',score:.91},{id:'demo-2',title:`Alternative match for “${parsed.terms}”`,subtitle:parsed.radius_miles?`Search radius: ${parsed.radius_miles} miles`:'Location radius not specified',provider:'FINDR demo',score:.78}];}
+app.get('/health',(req,res)=>res.json({ok:true,service:'findr-api'}));
+app.post('/v1/search',async(req,res)=>{const query=String(req.body?.query||'').trim();if(!query)return res.status(400).json({error:'query required'});const parsed=parseQuery(query);res.json({query,parsed,results:demoResults(parsed),demo:true});});
+app.post('/v1/watches',(req,res)=>{const query=String(req.body?.query||'').trim();if(!query)return res.status(400).json({error:'query required'});const item={id:crypto.randomUUID(),query,parsed:req.body?.parsed||parseQuery(query),enabled:true,created_at:new Date().toISOString()};watches.unshift(item);res.status(201).json(item);});
+app.get('/v1/watches',(req,res)=>res.json(watches));
+const port=Number(process.env.PORT||8787);app.listen(port,()=>console.log(`FINDR API listening on :${port}`));
