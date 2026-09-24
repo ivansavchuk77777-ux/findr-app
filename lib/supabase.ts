@@ -4,20 +4,23 @@ import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const isWeb = Platform.OS === 'web';
+const isBrowser = isWeb && typeof window !== 'undefined';
 
-// AsyncStorage depends on window on web. During Expo static rendering there is no
-// browser window, so only attach persistent storage in a real client runtime.
-const isBrowser = Platform.OS === 'web' && typeof window !== 'undefined';
-const storage = Platform.OS === 'web' ? (isBrowser ? window.localStorage : undefined) : AsyncStorage;
+const authOptions = isWeb
+  ? {
+      autoRefreshToken: isBrowser,
+      persistSession: isBrowser,
+      detectSessionInUrl: isBrowser,
+    }
+  : {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    };
 
-export const supabase = url && key ? createClient(url, key, {
-  auth: {
-    ...(storage ? { storage } : {}),
-    autoRefreshToken: isBrowser || Platform.OS !== 'web',
-    persistSession: Boolean(storage),
-    detectSessionInUrl: isBrowser,
-  }
-}) : null;
+export const supabase = url && key ? createClient(url, key, { auth: authOptions }) : null;
 
 export const isSupabaseConfigured = Boolean(supabase);
 export function getSupabase(){ if(!supabase) throw new Error('Supabase is not configured'); return supabase; }
