@@ -7,9 +7,12 @@ export async function getCurrentUser(){
 }
 
 export async function addSearch(query:string, keepLooking=false){
-  const user=await getCurrentUser();
-  if(!user) throw new Error('Please sign in first');
-  const { data, error }=await getSupabase().from('searches').insert({user_id:user.id,query,keep_looking:keepLooking,active:true}).select().single();
+  const client=getSupabase();
+  const {data:{session},error:sessionError}=await client.auth.getSession();
+  if(sessionError) throw sessionError;
+  if(!session?.user) throw new Error('Please sign in first');
+  const user=session.user;
+  const { data, error }=await client.from('searches').insert({user_id:user.id,query,keep_looking:keepLooking,active:true}).select().single();
   if(error) throw error;
   return data;
 }
