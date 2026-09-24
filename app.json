@@ -20,6 +20,9 @@
     "web": {
       "bundler": "metro",
       "output": "static"
+    },
+    "experiments": {
+      "baseUrl": "/findr-app"
     }
   }
 }
