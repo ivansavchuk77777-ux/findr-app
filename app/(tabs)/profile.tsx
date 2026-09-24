@@ -36,7 +36,7 @@ export default function Profile(){
   const signup=async()=>{
     try{
       setBusy(true);
-      const {data,error}=await getSupabase().auth.signUp({email:email.trim(),password});
+      const {data,error}=await getSupabase().auth.signUp({email:email.trim(),password,options:{emailRedirectTo:'https://ivansavchuk77777-ux.github.io/findr-app/'}});
       if(error) throw error;
       setPassword('');
       if(data.session) await refresh();
